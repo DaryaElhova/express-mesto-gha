@@ -72,7 +72,7 @@ const updateUser = (req, res) => {
   userSchema
     .findByIdAndUpdate(req.user._id, {
       ...req.body,
-    })
+    }, { runValidators: true })
     .then((user) => {
       if (!user) {
         return res.status(404).send({
