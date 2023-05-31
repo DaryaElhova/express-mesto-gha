@@ -14,6 +14,10 @@ mongoose.connect('mongodb://127.0.0.1/mestodb')
 const app = express();
 app.use(express.json());
 
+app.use((req, res) => {
+  res.status(404).send({ message: 'Page Not Found' });
+});
+
 app.use((req, res, next) => {
   req.user = {
     _id: '64750ea3e9498313e85691a1',
