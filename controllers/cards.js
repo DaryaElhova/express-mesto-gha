@@ -12,6 +12,14 @@ const handleErrors = (res, err) => {
   });
 };
 
+const validationErrors = (res, err) => {
+  res.status(INVALID_DATA).send({
+    message: 'Invalid data',
+    err: err.message,
+    stack: err.stack,
+  });
+};
+
 const getCards = (req, res) => {
   cardSchema
     .find({})
@@ -44,11 +52,7 @@ const createCard = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
-        return res.status(INVALID_DATA).send({
-          message: 'Invalid data',
-          err: err.message,
-          stack: err.stack,
-        });
+        return validationErrors(res, err);
       }
       return handleErrors(res, err);
     });
@@ -66,7 +70,10 @@ const deleteCard = (req, res) => {
       return res.send(card);
     })
     .catch((err) => {
-      handleErrors(res, err);
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
+        return validationErrors(res, err);
+      }
+      return handleErrors(res, err);
     });
 };
 
@@ -87,11 +94,7 @@ const likeCard = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(INVALID_DATA).send({
-          message: 'Invalid data for Liking',
-          err: err.message,
-          stack: err.stack,
-        });
+        return validationErrors(res, err);
       }
       return handleErrors(res, err);
     });
@@ -114,11 +117,7 @@ const deleteLike = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(INVALID_DATA).send({
-          message: 'Invalid data for Disliking',
-          err: err.message,
-          stack: err.stack,
-        });
+        return validationErrors(res, err);
       }
       return handleErrors(res, err);
     });

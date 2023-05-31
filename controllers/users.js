@@ -48,7 +48,10 @@ const getUserById = (req, res) => {
       return res.send(user);
     })
     .catch((err) => {
-      handleErrors(res, err);
+      if (err.name === 'Validationerror' || err.name === 'CastError') {
+        return validationErrors(res, err);
+      }
+      return handleErrors(res, err);
     });
 };
 
