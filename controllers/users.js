@@ -72,7 +72,7 @@ const updateUser = (req, res) => {
   userSchema
     .findByIdAndUpdate(req.user._id, {
       ...req.body,
-    }, { runValidators: true })
+    }, { runValidators: true }, { new: true })
     .then((user) => {
       if (!user) {
         return res.status(404).send({
@@ -91,10 +91,12 @@ const updateUser = (req, res) => {
 };
 
 const updateAvatar = (req, res) => {
+  const { avatar } = req.body;
+
   userSchema
     .findByIdAndUpdate(req.user._id, {
-      ...req.body,
-    })
+      avatar,
+    }, { runValidators: true }, { new: true })
     .then((user) => {
       if (!user) {
         return res.status(404).send({
