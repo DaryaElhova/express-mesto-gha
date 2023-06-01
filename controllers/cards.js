@@ -54,7 +54,7 @@ const createCard = (req, res) => {
 
 const deleteCard = (req, res) => {
   cardSchema
-    .findByIdAndRemove(req.params._id)
+    .findByIdAndRemove(req.params._id, { new: true })
     .then((card) => {
       if (!card) {
         return res.status(NOT_FOUND).send({
