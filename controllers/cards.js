@@ -1,21 +1,19 @@
 const cardSchema = require('../models/card');
 
-const INVALID_DATA = 400;
+const BAD_REQUEST = 400;
 const NOT_FOUND = 404;
-const SERVER_ERROR = 500;
+const INTERNAL_SERVER_ERROR = 500;
 
 const handleErrors = (res, err) => {
-  res.status(SERVER_ERROR).send({
+  res.status(INTERNAL_SERVER_ERROR).send({
     message: 'Internal Server Error',
-    err: err.message,
     stack: err.stack,
   });
 };
 
 const validationErrors = (res, err) => {
-  res.status(INVALID_DATA).send({
+  res.status(BAD_REQUEST).send({
     message: 'Invalid data',
-    err: err.message,
     stack: err.stack,
   });
 };
@@ -24,17 +22,13 @@ const getCards = (req, res) => {
   cardSchema
     .find({})
     .then((cards) => {
+      if (!cards || cards.length === 0) {
+        throw new Error('Cards Not Found');
+      }
       res.send(cards);
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
-        return res.status(NOT_FOUND).send({
-          message: 'Not found',
-          err: err.message,
-          stack: err.stack,
-        });
-      }
-      return handleErrors(res, err);
+      handleErrors(res, err);
     });
 };
 
@@ -51,7 +45,7 @@ const createCard = (req, res) => {
       res.status(201).send(card);
     })
     .catch((err) => {
-      if (err.name === 'CastError' || err.name === 'ValidationError') {
+      if (err.name === 'ValidationError') {
         return validationErrors(res, err);
       }
       return handleErrors(res, err);
@@ -70,7 +64,7 @@ const deleteCard = (req, res) => {
       return res.send(card);
     })
     .catch((err) => {
-      if (err.name === 'ValidationError' || err.name === 'CastError') {
+      if (err.name === 'CastError') {
         return validationErrors(res, err);
       }
       return handleErrors(res, err);

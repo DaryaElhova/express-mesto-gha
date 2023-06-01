@@ -1,38 +1,34 @@
 const userSchema = require('../models/user');
 
-const INVALID_DATA = 400;
+const BAD_REQUEST = 400;
 const NOT_FOUND = 404;
-const SERVER_ERROR = 500;
+const INTERNAL_SERVER_ERROR = 500;
 
 const handleErrors = (res, err) => {
-  res.status(SERVER_ERROR).send({
+  res.status(INTERNAL_SERVER_ERROR).send({
     message: 'Internal Server Error',
-    err: err.message,
     stack: err.stack,
   });
 };
 
 const validationErrors = (res, err) => {
-  res.status(INVALID_DATA).send({
+  res.status(BAD_REQUEST).send({
     message: 'Invalid Data',
-    err: err.message,
     stack: err.stack,
   });
 };
 
-const getUser = (req, res) => {
+const getUsers = (req, res) => {
   userSchema
     .find({})
     .then((users) => {
+      if (!users || users.length === 0) {
+        throw new Error('Users Not Found');
+      }
       res.send(users);
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
-        return res.status(INVALID_DATA).send({
-          message: 'Users Not Found',
-        });
-      }
-      return handleErrors(res, err);
+      handleErrors(res, err);
     });
 };
 
@@ -48,7 +44,7 @@ const getUserById = (req, res) => {
       return res.send(user);
     })
     .catch((err) => {
-      if (err.name === 'Validationerror' || err.name === 'CastError') {
+      if (err.name === 'CastError') {
         return validationErrors(res, err);
       }
       return handleErrors(res, err);
@@ -64,7 +60,7 @@ const createUser = (req, res) => {
       res.send(newUser);
     })
     .catch((err) => {
-      if (err.name === 'CastError' || err.name === 'ValidationError') {
+      if (err.name === 'ValidationError') {
         return validationErrors(res, err);
       }
       return handleErrors(res, err);
@@ -85,7 +81,7 @@ const updateUser = (req, res) => {
       return res.send(user);
     })
     .catch((err) => {
-      if (err.name === 'ValidationError' || err.name === 'CastError') {
+      if (err.name === 'ValidationError') {
         return validationErrors(res, err);
       }
 
@@ -117,7 +113,7 @@ const updateAvatar = (req, res) => {
 };
 
 module.exports = {
-  getUser,
+  getUsers,
   getUserById,
   createUser,
   updateUser,
