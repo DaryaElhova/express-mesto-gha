@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const router = require('./routes/index');
+const cardRouter = require('./routes/cards');
+const userRouter = require('./routes/users');
 
 mongoose.connect('mongodb://127.0.0.1/mestodb')
   .then(() => {
@@ -21,7 +22,9 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(router);
+app.use(cardRouter);
+app.use(userRouter);
+
 app.use((req, res) => {
   res.status(404).send({ message: 'Not Found' });
 });
