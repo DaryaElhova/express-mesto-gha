@@ -22,7 +22,7 @@ const getCards = (req, res) => {
   cardSchema
     .find({})
     .then((cards) => {
-      if (!cards || cards.length === 0) {
+      if (!cards) {
         throw new Error('Cards Not Found');
       }
       res.send(cards);
@@ -54,7 +54,7 @@ const createCard = (req, res) => {
 
 const deleteCard = (req, res) => {
   cardSchema
-    .findByIdAndRemove(req.params._id, { new: true })
+    .findByIdAndRemove(req.params._id)
     .then((card) => {
       if (!card) {
         return res.status(NOT_FOUND).send({

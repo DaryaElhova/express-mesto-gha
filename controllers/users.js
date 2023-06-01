@@ -22,7 +22,7 @@ const getUsers = (req, res) => {
   userSchema
     .find({})
     .then((users) => {
-      if (!users || users.length === 0) {
+      if (!users) {
         throw new Error('Users Not Found');
       }
       res.send(users);
