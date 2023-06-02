@@ -22,9 +22,6 @@ const getCards = (req, res) => {
   cardSchema
     .find({})
     .then((cards) => {
-      if (!cards) {
-        throw new Error('Cards Not Found');
-      }
       res.send(cards);
     })
     .catch((err) => {

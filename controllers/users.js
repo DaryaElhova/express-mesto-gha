@@ -22,9 +22,6 @@ const getUsers = (req, res) => {
   userSchema
     .find({})
     .then((users) => {
-      if (!users) {
-        throw new Error('Users Not Found');
-      }
       res.send(users);
     })
     .catch((err) => {
@@ -105,7 +102,7 @@ const updateAvatar = (req, res) => {
       return res.send(user);
     })
     .catch((err) => {
-      if (err.name === 'ValidationError' || err.name === 'CastError') {
+      if (err.name === 'ValidationError') {
         return validationErrors(res, err);
       }
       return handleErrors(res, err);
