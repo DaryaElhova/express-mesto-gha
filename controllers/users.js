@@ -71,7 +71,7 @@ const updateUser = (req, res) => {
     }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
-        return res.status(404).send({
+        return res.status(NOT_FOUND).send({
           message: 'User Not Found',
         });
       }
@@ -95,7 +95,7 @@ const updateAvatar = (req, res) => {
     }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
-        return res.status(404).send({
+        return res.status(NOT_FOUND).send({
           message: 'User Not Found',
         });
       }

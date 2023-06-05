@@ -3,6 +3,8 @@ const mongoose = require('mongoose');
 const cardRouter = require('./routes/cards');
 const userRouter = require('./routes/users');
 
+const NOT_FOUND = 404;
+
 mongoose.connect('mongodb://127.0.0.1/mestodb')
   .then(() => {
     console.log('Connecting...');
@@ -26,7 +28,7 @@ app.use(cardRouter);
 app.use(userRouter);
 
 app.use((req, res) => {
-  res.status(404).send({ message: 'Not Found' });
+  res.status(NOT_FOUND).send({ message: 'Not Found' });
 });
 
 const { PORT = 3000 } = process.env;
