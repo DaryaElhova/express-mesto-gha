@@ -3,6 +3,7 @@ const cardSchema = require('../models/card');
 const BAD_REQUEST = 400;
 const NOT_FOUND = 404;
 const INTERNAL_SERVER_ERROR = 500;
+const SUCCESS_CREATED = 201
 
 const handleErrors = (res, err) => {
   res.status(INTERNAL_SERVER_ERROR).send({
@@ -39,7 +40,7 @@ const createCard = (req, res) => {
       owner: req.user._id,
     })
     .then((card) => {
-      res.status(201).send(card);
+      res.status(SUCCESS_CREATED).send(card);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
