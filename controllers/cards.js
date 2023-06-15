@@ -1,36 +1,21 @@
 const cardSchema = require('../models/card');
 
-const BAD_REQUEST = 400;
-const NOT_FOUND = 404;
-const INTERNAL_SERVER_ERROR = 500;
+const BadRequest = require('../utils/errors-constructor/BadRequest');
+const NotFound = require('../utils/errors-constructor/NotFound');
+const Forbidden = require('../utils/errors-constructor/Forbidden');
+
 const SUCCESS_CREATED = 201;
 
-const handleErrors = (res, err) => {
-  res.status(INTERNAL_SERVER_ERROR).send({
-    message: 'Internal Server Error',
-    stack: err.stack,
-  });
-};
-
-const validationErrors = (res, err) => {
-  res.status(BAD_REQUEST).send({
-    message: 'Invalid data',
-    stack: err.stack,
-  });
-};
-
-const getCards = (req, res) => {
+const getCards = (req, res, next) => {
   cardSchema
     .find({})
     .then((cards) => {
       res.send(cards);
     })
-    .catch((err) => {
-      handleErrors(res, err);
-    });
+    .catch(next);
 };
 
-const createCard = (req, res) => {
+const createCard = (req, res, next) => {
   const { name, link } = req.body;
   // обязательно предоставить данные для owner
   cardSchema
@@ -44,32 +29,35 @@ const createCard = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return validationErrors(res, err);
+        throw new BadRequest('Некорректные данные');
       }
-      return handleErrors(res, err);
+      next(err);
     });
 };
 
-const deleteCard = (req, res) => {
+const deleteCard = (req, res, next) => {
   cardSchema
-    .findByIdAndRemove(req.params._id)
+    .findById(req.params._id)
     .then((card) => {
       if (!card) {
-        return res.status(NOT_FOUND).send({
-          message: 'Card Not Found',
-        });
+        throw new NotFound('Карточка не найденна');
       }
-      return res.send(card);
+      if (!card.owner.equals(req.user._id)) {
+        throw new Forbidden('У вас нет прав доступа');
+      }
+      return cardSchema.findByIdAndDelete(req.params._id)
+        .orFail(() => new NotFound('Карточка не найдена'))
+        .then(() => res.send({ message: 'Карточка удалена' }));
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return validationErrors(res, err);
+        throw new BadRequest('Некорректные данные');
       }
-      return handleErrors(res, err);
+      next(err);
     });
 };
 
-const likeCard = (req, res) => {
+const likeCard = (req, res, next) => {
   cardSchema
     .findByIdAndUpdate(
       req.params._id,
@@ -78,21 +66,19 @@ const likeCard = (req, res) => {
     )
     .then((card) => {
       if (!card) {
-        return res.status(NOT_FOUND).send({
-          message: 'Card Not Found',
-        });
+        throw new NotFound('Карточка не найденна');
       }
       return res.send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return validationErrors(res, err);
+        throw new BadRequest('Некорректные данные');
       }
-      return handleErrors(res, err);
+      next(err);
     });
 };
 
-const deleteLike = (req, res) => {
+const deleteLike = (req, res, next) => {
   cardSchema
     .findByIdAndUpdate(
       req.params._id,
@@ -101,17 +87,15 @@ const deleteLike = (req, res) => {
     )
     .then((card) => {
       if (!card) {
-        return res.status(NOT_FOUND).send({
-          message: 'Card Not Found',
-        });
+        throw new NotFound('Карточка не найденна');
       }
       return res.send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return validationErrors(res, err);
+        throw new BadRequest('Некорректные данные');
       }
-      return handleErrors(res, err);
+      next(err);
     });
 };
 

@@ -1,92 +1,124 @@
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const userSchema = require('../models/user');
+// const user = require('../models/user');
 
-const BAD_REQUEST = 400;
-const NOT_FOUND = 404;
-const INTERNAL_SERVER_ERROR = 500;
+const BadRequest = require('../utils/errors-constructor/BadRequest');
+const NotFound = require('../utils/errors-constructor/NotFound');
+const Unauthorized = require('../utils/errors-constructor/Unauthorized');
 
-const handleErrors = (res, err) => {
-  res.status(INTERNAL_SERVER_ERROR).send({
-    message: 'Internal Server Error',
-    stack: err.stack,
-  });
-};
+const OK = 200;
 
-const validationErrors = (res, err) => {
-  res.status(BAD_REQUEST).send({
-    message: 'Invalid Data',
-    stack: err.stack,
-  });
-};
+const SALT_ROUNDS = 10;
 
-const getUsers = (req, res) => {
+const getUsers = (req, res, next) => {
   userSchema
     .find({})
     .then((users) => {
       res.send(users);
     })
-    .catch((err) => {
-      handleErrors(res, err);
-    });
+    .catch(next);
 };
 
-const getUserById = (req, res) => {
+const getUserById = (req, res, next) => {
   userSchema
     .findById(req.params._id)
     .then((user) => {
       if (!user) {
-        return res.status(NOT_FOUND).send({
-          message: 'User Not Found',
-        });
+        throw new NotFound('Пользователь не найден');
       }
       return res.send(user);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return validationErrors(res, err);
+        throw new BadRequest('Введенные данные некорректны');
       }
-      return handleErrors(res, err);
+      next(err);
     });
 };
 
-const createUser = (req, res) => {
-  const { name, about, avatar } = req.body;
+const getUser = (req, res, next) => {
+  userSchema
+    .findById(req.user._id)
+    .then((user) => {
+      if (!user) {
+        throw new NotFound('Такой пользователь не найден');
+      } else { res.send(user); }
+    })
+    .catch(next);
+};
+
+const createUser = (req, res, next) => {
+  bcrypt.hash(req.body.password, SALT_ROUNDS)
+    .then((hash) => {
+      userSchema
+        .create({
+          name: req.body.name,
+          about: req.body.about,
+          avatar: req.body.avatar,
+          email: req.body.email,
+          password: hash,
+        })
+        .then((newUser) => {
+          res.send(newUser);
+        })
+        .catch((err) => {
+          if (err.name === 'ValidationError') {
+            throw new BadRequest('Введены некорректные данные');
+          }
+          next(err);
+        });
+    });
+};
+
+const loginUser = (req, res, next) => {
+  const { email, password } = req.body;
 
   userSchema
-    .create({ name, about, avatar })
-    .then((newUser) => {
-      res.send(newUser);
+    .findOne({ email }).select('+password')
+    .then((user) => {
+      if (!user) {
+        return Promise.reject(new Error('Неправильная почта илии пароль'));
+      }
+      return Promise.all([user, bcrypt.compare(password, user.password)]);
+    })
+    .then(([user, isEqual]) => {
+      if (!isEqual) {
+        return Promise.reject(new Error('Неправильная почта илии пароль'));
+      }
+
+      const token = jwt.sign({ _id: user._id }, 'secret-key');
+      res.status(OK).send({ token });
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return validationErrors(res, err);
+      if (err.message === 'Unauthorized') {
+        throw new Unauthorized('Ошибка авторизации');
       }
-      return handleErrors(res, err);
+      next(err);
     });
 };
 
-const updateUser = (req, res) => {
+const updateUser = (req, res, next) => {
   userSchema
     .findByIdAndUpdate(req.user._id, {
       ...req.body,
     }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
-        return res.status(NOT_FOUND).send({
-          message: 'User Not Found',
-        });
+        throw new NotFound('Такой пользователь не найден');
       }
       return res.send(user);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return validationErrors(res, err);
+        throw new BadRequest('Введенные данные некорректны');
       }
 
-      return handleErrors(res, err);
+      next(err);
     });
 };
 
-const updateAvatar = (req, res) => {
+const updateAvatar = (req, res, next) => {
   const { avatar } = req.body;
 
   userSchema
@@ -95,17 +127,15 @@ const updateAvatar = (req, res) => {
     }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
-        return res.status(NOT_FOUND).send({
-          message: 'User Not Found',
-        });
+        throw new NotFound('Такой пользователь не найден');
       }
       return res.send(user);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return validationErrors(res, err);
+        throw new BadRequest('Введенные данные некорректны');
       }
-      return handleErrors(res, err);
+      next(err);
     });
 };
 
@@ -115,4 +145,6 @@ module.exports = {
   createUser,
   updateUser,
   updateAvatar,
+  loginUser,
+  getUser,
 };
