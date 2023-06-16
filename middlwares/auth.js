@@ -1,11 +1,13 @@
 const jwt = require('jsonwebtoken');
 
+const Unauthorized = require('../utils/errors-constructor/Unauthorized');
+
 const auth = (req, res, next) => {
   const { authorization } = req.headers;
 
   // Проверяем что заголовок есть и он содержит Bearer
   if (!authorization || !authorization.startsWith('Bearer ')) {
-    return res.status(401).send({ message: 'Небходима авторизация' });
+    throw new Unauthorized('Необходима авторизация');
   }
   // извлекаем токен из заголовка
   const token = authorization.replace('Bearer ', '');

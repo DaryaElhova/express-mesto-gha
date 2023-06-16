@@ -6,9 +6,10 @@ const userSchema = require('../models/user');
 const BadRequest = require('../utils/errors-constructor/BadRequest');
 const NotFound = require('../utils/errors-constructor/NotFound');
 const Unauthorized = require('../utils/errors-constructor/Unauthorized');
+const ConflictError = require('../utils/errors-constructor/ConflictError');
 
+const MONGO_DUPLICATE_KEY_ERROR = 11000;
 const OK = 200;
-
 const SALT_ROUNDS = 10;
 
 const getUsers = (req, res, next) => {
@@ -22,7 +23,7 @@ const getUsers = (req, res, next) => {
 
 const getCurrentUser = (req, res, next) => {
   const userId = req.user._id;
-  console.log(userId);
+
   userSchema
     .findById(userId)
     .then((user) => {
@@ -65,6 +66,9 @@ const createUser = (req, res, next) => {
           res.send(newUser);
         })
         .catch((err) => {
+          if (err.code === MONGO_DUPLICATE_KEY_ERROR) {
+            throw new ConflictError('Такой пользователь уже существует')
+          }
           if (err.name === 'ValidationError') {
             throw new BadRequest('Введены некорректные данные');
           }
@@ -80,7 +84,7 @@ const loginUser = (req, res, next) => {
     .findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
-        return Promise.reject(new Error('Неправильная почта илии пароль'));
+        return Promise.reject(new Error('Неправильная почта или пароль'));
       }
       return Promise.all([user, bcrypt.compare(password, user.password)]);
     })
