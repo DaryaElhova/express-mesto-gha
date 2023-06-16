@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const cardRouter = require('./routes/cards');
 const userRouter = require('./routes/users');
 const { loginUser, createUser } = require('./controllers/users');
+const { validateAuth, validateCreateUser } = require('./middlwares/validate');
 
 const NOT_FOUND = 404;
 
@@ -17,8 +18,8 @@ mongoose.connect('mongodb://127.0.0.1/mestodb')
 const app = express();
 app.use(express.json());
 
-app.post('/signin', loginUser);
-app.post('/signup', createUser);
+app.post('/signin', validateAuth, loginUser);
+app.post('/signup', validateCreateUser, createUser);
 app.use(cardRouter);
 app.use(userRouter);
 

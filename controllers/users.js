@@ -1,7 +1,6 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const userSchema = require('../models/user');
-// const user = require('../models/user');
 
 const BadRequest = require('../utils/errors-constructor/BadRequest');
 const NotFound = require('../utils/errors-constructor/NotFound');
