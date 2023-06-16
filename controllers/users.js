@@ -20,6 +20,19 @@ const getUsers = (req, res, next) => {
     .catch(next);
 };
 
+const getCurrentUser = (req, res, next) => {
+  const userId = req.user._id;
+  console.log(userId);
+  userSchema
+    .findById(userId)
+    .then((user) => {
+      if (!user) {
+        throw new NotFound('Такой пользователь не найден');
+      } else { res.send(user); }
+    })
+    .catch(next);
+};
+
 const getUserById = (req, res, next) => {
   userSchema
     .findById(req.params._id)
@@ -35,17 +48,6 @@ const getUserById = (req, res, next) => {
       }
       next(err);
     });
-};
-
-const getUser = (req, res, next) => {
-  userSchema
-    .findById(req.user._id)
-    .then((user) => {
-      if (!user) {
-        throw new NotFound('Такой пользователь не найден');
-      } else { res.send(user); }
-    })
-    .catch(next);
 };
 
 const createUser = (req, res, next) => {
@@ -146,5 +148,5 @@ module.exports = {
   updateUser,
   updateAvatar,
   loginUser,
-  getUser,
+  getCurrentUser,
 };
