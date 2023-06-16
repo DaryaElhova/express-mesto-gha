@@ -90,7 +90,7 @@ const loginUser = (req, res, next) => {
       }
 
       const token = jwt.sign({ _id: user._id }, 'secret-key');
-      res.status(OK).send({ token });
+      return res.status(OK).send({ token });
     })
     .catch((err) => {
       if (err.message === 'Unauthorized') {

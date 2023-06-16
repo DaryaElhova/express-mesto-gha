@@ -28,6 +28,7 @@ app.use((req, res) => {
 
 app.use((err, req, res, next) => {
   res.status(500).send({ message: err.message });
+  next();
 });
 
 const { PORT = 3000 } = process.env;
