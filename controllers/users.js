@@ -62,11 +62,16 @@ const createUser = (req, res, next) => {
           password: hash,
         })
         .then((newUser) => {
-          res.send(newUser);
+          res.send({
+            name: newUser.name,
+            about: newUser.about,
+            avatar: newUser.avatar,
+            email: newUser.email,
+          });
         })
         .catch((err) => {
           if (err.code === MONGO_DUPLICATE_KEY_ERROR) {
-            throw new ConflictError('Такой пользователь уже существует')
+            throw new ConflictError('Такой пользователь уже существует');
           }
           if (err.name === 'ValidationError') {
             throw new BadRequest('Введены некорректные данные');
