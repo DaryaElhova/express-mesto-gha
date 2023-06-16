@@ -1,5 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const { errors } = require('celebrate');
 const cardRouter = require('./routes/cards');
 const userRouter = require('./routes/users');
 const { loginUser, createUser } = require('./controllers/users');
@@ -22,6 +23,7 @@ app.post('/signin', validateAuth, loginUser);
 app.post('/signup', validateCreateUser, createUser);
 app.use(cardRouter);
 app.use(userRouter);
+app.use(errors());
 
 app.use((req, res) => {
   res.status(NOT_FOUND).send({ message: 'Not Found' });

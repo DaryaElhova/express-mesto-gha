@@ -17,7 +17,7 @@ const auth = (req, res, next) => {
   try {
     payload = jwt.verify(token, 'secret-key', { expiresIn: '7d' });
   } catch (err) {
-    return res.status(401).send({ message: 'Необходима авторизация' });
+    throw new Unauthorized('Необходима авторизация');
   }
 
   req.user = payload;
