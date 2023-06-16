@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const usersController = require('../controllers/users');
 const { auth } = require('../middlwares/auth');
-const { validateUpdateUser, validateUpdateAvatar } = require('../middlwares/validate')
+const { validateUpdateUser, validateUpdateAvatar } = require('../middlwares/validate');
 
 router.use(auth);
 router.get('/users', usersController.getUsers);
