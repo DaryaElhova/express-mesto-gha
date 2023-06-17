@@ -19,18 +19,18 @@ mongoose.connect('mongodb://127.0.0.1/mestodb')
 const app = express();
 app.use(express.json());
 
+app.use(errors());
 app.post('/signin', validateAuth, loginUser);
 app.post('/signup', validateCreateUser, createUser);
 app.use(cardRouter);
 app.use(userRouter);
-app.use(errors());
 
 app.use((req, res) => {
   res.status(NOT_FOUND).send({ message: 'Not Found' });
 });
 
 app.use((err, req, res, next) => {
-  res.status(500).send({ message: err.message });
+  res.status(err.statusCode).send({ message: err.message });
   next();
 });
 
