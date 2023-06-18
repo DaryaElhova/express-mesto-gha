@@ -26,12 +26,12 @@ const userSchema = new mongoose.Schema({
       validator: (value) => validator.isEmail(value),
       message: '{VALUE} не является действительным адресом электронной почты.',
     },
-    select: false,
   },
   password: {
     type: String,
     required: true,
     minlength: 4,
+    select: false,
   },
 }, { versionKey: false });
 
