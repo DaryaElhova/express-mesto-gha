@@ -28,7 +28,14 @@ const getCurrentUser = (req, res, next) => {
     .then((user) => {
       if (!user) {
         throw new NotFound('Такой пользователь не найден');
-      } else { res.send(user); }
+      } else {
+        res.send({
+          _id: user._id,
+          name: user.name,
+          about: user.about,
+          avatar: user.avatar,
+        });
+      }
     })
     .catch(next);
 };
@@ -88,13 +95,13 @@ const loginUser = (req, res, next) => {
     .findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
-        return Promise.reject(new Error('Неправильная почта или пароль'));
+        throw new Unauthorized('Неправильная почта или пароль');
       }
       return Promise.all([user, bcrypt.compare(password, user.password)]);
     })
     .then(([user, isEqual]) => {
       if (!isEqual) {
-        return Promise.reject(new Error('Неправильная почта илии пароль'));
+        throw new Unauthorized('Неправильная почта илии пароль');
       }
 
       const token = jwt.sign({ _id: user._id }, 'secret-key');
