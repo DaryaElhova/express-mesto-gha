@@ -70,13 +70,13 @@ const createUser = (req, res, next) => {
           });
         })
         .catch((err) => {
-          if (err.code === MONGO_DUPLICATE_KEY_ERROR) {
-            throw new ConflictError('Такой пользователь уже существует');
-          }
           if (err.name === 'ValidationError') {
             throw new BadRequest('Введены некорректные данные');
+          } else if (err.code === MONGO_DUPLICATE_KEY_ERROR) {
+            next(new ConflictError('Такой пользователь уже существует'));
+          } else {
+            next(err);
           }
-          next(err);
         });
     });
 };
