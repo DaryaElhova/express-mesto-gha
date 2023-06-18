@@ -66,7 +66,8 @@ const getUserById = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        throw new BadRequest('Введенные данные некорректны');
+        next(new BadRequest('Введенные данные некорректны'));
+        return;
       }
       next(err);
     });
