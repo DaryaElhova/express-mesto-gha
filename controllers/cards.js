@@ -9,6 +9,7 @@ const SUCCESS_CREATED = 201;
 const getCards = (req, res, next) => {
   cardSchema
     .find({})
+    .select('-__v')
     .then((cards) => {
       res.send(cards);
     })
@@ -29,7 +30,7 @@ const createCard = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new BadRequest('Некорректные данные');
+        next(new BadRequest('Некорректные данные'));
       }
       next(err);
     });
