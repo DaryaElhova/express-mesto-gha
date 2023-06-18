@@ -13,9 +13,16 @@ const SALT_ROUNDS = 10;
 
 const getUsers = (req, res, next) => {
   userSchema
-    .find({})
+    .find({}).select('-password')
     .then((users) => {
-      res.send(users);
+      const sanitizedUsers = users.map((user) => ({
+        _id: user._id,
+        name: user.name,
+        about: user.about,
+        avatar: user.avatar,
+      }));
+
+      res.send(sanitizedUsers);
     })
     .catch(next);
 };
@@ -47,7 +54,12 @@ const getUserById = (req, res, next) => {
       if (!user) {
         throw new NotFound('Пользователь не найден');
       }
-      return res.send(user);
+      return res.send({
+        _id: user._id,
+        name: user.name,
+        about: user.about,
+        avatar: user.avatar,
+      });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
