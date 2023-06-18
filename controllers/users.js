@@ -20,6 +20,7 @@ const getUsers = (req, res, next) => {
         name: user.name,
         about: user.about,
         avatar: user.avatar,
+        email: user.email,
       }));
 
       res.send(sanitizedUsers);
@@ -41,6 +42,7 @@ const getCurrentUser = (req, res, next) => {
           name: user.name,
           about: user.about,
           avatar: user.avatar,
+          email: user.email,
         });
       }
     })
@@ -59,6 +61,7 @@ const getUserById = (req, res, next) => {
         name: user.name,
         about: user.about,
         avatar: user.avatar,
+        email: user.email,
       });
     })
     .catch((err) => {
