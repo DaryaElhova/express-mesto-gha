@@ -4,7 +4,7 @@ const BadRequest = require('../utils/errors-constructor/BadRequest');
 const NotFound = require('../utils/errors-constructor/NotFound');
 const Forbidden = require('../utils/errors-constructor/Forbidden');
 
-const SUCCESS_CREATED = 201;
+const { SUCCESS_CREATED } = require('../utils/constants');
 
 const getCards = (req, res, next) => {
   cardSchema

@@ -5,8 +5,8 @@ const cardRouter = require('./routes/cards');
 const userRouter = require('./routes/users');
 const { loginUser, createUser } = require('./controllers/users');
 const { validateAuth, validateCreateUser } = require('./middlwares/validate');
-
-const NOT_FOUND = 404;
+const NotFound = require('./utils/errors-constructor/NotFound');
+const { errorHandler } = require('./middlwares/error-handler');
 
 mongoose.connect('mongodb://127.0.0.1/mestodb')
   .then(() => {
@@ -24,16 +24,13 @@ app.post('/signup', validateCreateUser, createUser);
 app.use(cardRouter);
 app.use(userRouter);
 
-app.use((req, res) => {
-  res.status(NOT_FOUND).send({ message: 'Not Found' });
+app.use((req, res, next) => {
+  next(new NotFound('Not Found'));
 });
 
 app.use(errors());
 
-app.use((err, req, res, next) => {
-  res.status(err.statusCode).send({ message: err.message });
-  next();
-});
+app.use(errorHandler);
 
 const { PORT = 3000 } = process.env;
 

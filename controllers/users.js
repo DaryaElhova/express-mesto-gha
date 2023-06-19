@@ -7,9 +7,7 @@ const NotFound = require('../utils/errors-constructor/NotFound');
 const Unauthorized = require('../utils/errors-constructor/Unauthorized');
 const ConflictError = require('../utils/errors-constructor/ConflictError');
 
-const MONGO_DUPLICATE_KEY_ERROR = 11000;
-const OK = 200;
-const SALT_ROUNDS = 10;
+const { MONGO_DUPLICATE_KEY_ERROR, OK, SALT_ROUNDS } = require('../utils/constants');
 
 const getUsers = (req, res, next) => {
   userSchema
@@ -85,7 +83,7 @@ const createUser = (req, res, next) => {
           password: hash,
         })
         .then((newUser) => {
-          res.send({
+          res.status(OK).send({
             name: newUser.name,
             about: newUser.about,
             avatar: newUser.avatar,
@@ -94,7 +92,7 @@ const createUser = (req, res, next) => {
         })
         .catch((err) => {
           if (err.name === 'ValidationError') {
-            throw new BadRequest('Введены некорректные данные');
+            next(new BadRequest('Введены некорректные данные'));
           } else if (err.code === MONGO_DUPLICATE_KEY_ERROR) {
             next(new ConflictError('Такой пользователь уже существует'));
           } else {
