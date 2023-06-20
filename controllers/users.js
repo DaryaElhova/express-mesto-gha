@@ -7,7 +7,12 @@ const NotFound = require('../utils/errors-constructor/NotFound');
 const Unauthorized = require('../utils/errors-constructor/Unauthorized');
 const ConflictError = require('../utils/errors-constructor/ConflictError');
 
-const { MONGO_DUPLICATE_KEY_ERROR, OK, SALT_ROUNDS, SUCCESS_CREATED } = require('../utils/constants');
+const {
+  MONGO_DUPLICATE_KEY_ERROR,
+  OK,
+  SALT_ROUNDS,
+  SUCCESS_CREATED,
+} = require('../utils/constants');
 
 const getUsers = (req, res, next) => {
   userSchema
